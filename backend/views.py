@@ -66,8 +66,21 @@ class CommentList(generics.ListCreateAPIView):
 	queryset = Comment.objects.all()
 	serializer_class = CommentSerializer
 	permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+	# TODO perform create from post(by frontend)
 	def perform_create(self, serializer):
 		serializer.save(p_owner=self.request.user)
+	# TODO
+	def get_queryset(self):
+		q_fields = self.request.GET.keys()
+		ans_queryset = Comment.objects.all()
+		if 'p_cid' in q_fields:
+			q_cid = self.request.GET['p_cid']
+			possible_courses = Course.objects.filter(c_id__contains=q_cid)
+			ans_queryset = ans_queryset.filter(p_cid__in=possible_courses)
+		if 'p_owner' in q_fields:
+			q_owner = self.request.GET['p_owner']
+			ans_queryset = ans_queryset.filter(p_owner__username=p_owner)
+		return ans_queryset
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
 	"""

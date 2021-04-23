@@ -15,7 +15,7 @@
         <el-submenu index="2">
           <template slot="title"><i class="el-icon-menu"></i>功能</template>
           <el-menu-item-group>
-            <el-menu-item index="2-1">评课</el-menu-item>
+            <el-menu-item index="2-1"><el-link href="http://localhost:8080/#/Comment" :underline="false">评课</el-link></el-menu-item>
           </el-menu-item-group>
         </el-submenu>
         <el-submenu index="3">
@@ -172,13 +172,18 @@ export default {
       info: [],
       dialogVisible: false,
       drawer: false,
-      direction: 'rtl'
+      direction: 'rtl',
+      submitFormLabelWidth: '120px'
     }
   },
   methods: {
     resetForm (formName) {
-      console.log(this.$refs[formName])
       this.$refs[formName].resetFields()
+      this.$notify({
+        title: '成功重置',
+        message: '完成!',
+        type: 'success'
+      })
     },
     searchCourses () {
       const that = this
@@ -189,7 +194,7 @@ export default {
         }
       }).then(function (response) {
         that.info = response.data
-        console.log(that.info)
+        // console.log(that.info)
       }).catch(function (error) {
         alert(error.message)
       })

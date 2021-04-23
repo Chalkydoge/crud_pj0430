@@ -1,8 +1,8 @@
 <template>
   <div class="Index">
   <SiteHeader></SiteHeader>
-  <el-container style="border: 1px solid #eee">
-    <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+  <el-container style="border: 1px solid #eee;">
+    <el-aside width="200px" style="background-color: rgb(238, 241, 246); min-height: 90vh;">
       <el-menu :default-openeds="[]">
         <el-submenu index="1">
           <template slot="title"><i class="el-icon-message"></i>主页</template>
