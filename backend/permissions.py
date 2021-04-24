@@ -1,5 +1,5 @@
 from rest_framework import permissions
-
+from django.contrib.auth.models import User
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
@@ -14,3 +14,13 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
         # Write permissions are only allowed to the owner of the snippet.
         return obj.p_owner == request.user
+
+class HasPermToWrite(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.has_perm('backend.add_comment')
+
+class HasPermToEditAndDelete(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.has_perm('backend.change_comment')

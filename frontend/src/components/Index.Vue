@@ -2,7 +2,7 @@
   <div class="Index">
   <SiteHeader></SiteHeader>
   <el-container style="border: 1px solid #eee;">
-    <el-aside width="200px" style="background-color: rgb(238, 241, 246); min-height: 90vh;">
+<!--     <el-aside width="200px" style="background-color: rgb(238, 241, 246); min-height: 90vh;">
       <el-menu :default-openeds="[]">
         <el-submenu index="1">
           <template slot="title"><i class="el-icon-message"></i>主页</template>
@@ -35,8 +35,8 @@
           </el-menu-item-group>
         </el-submenu>
       </el-menu>
-    </el-aside>
-
+    </el-aside> -->
+    <Sidebar></Sidebar>
     <el-container>
       <el-header style="text-align: right; font-size: 12px;">
         <el-dropdown>
@@ -50,18 +50,7 @@
       </el-header>
 
       <el-main>
-        <el-table :data="tableData">
-          <el-table-column prop="c_id" label="课程号" width="140">
-          </el-table-column>
-          <el-table-column prop="c_name" label="课程名称" width="200">
-          </el-table-column>
-          <el-table-column prop="c_teacher" label="授课教师" width="140">
-          </el-table-column>
-          <el-table-column prop="c_classroom" label="上课地点" width="140">
-          </el-table-column>
-          <el-table-column prop="c_dept" label="开课院系" width="140">
-          </el-table-column>
-        </el-table>
+        <el-button type="primary" @click="wrap();">神奇按钮</el-button>
       </el-main>
     </el-container>
 
@@ -70,27 +59,60 @@
 </template>
 
 <script>
-import {showCourses} from '../api/api.js'
+import Sidebar from '@/components/Sidebar'
 import SiteHeader from '@/components/SiteHeader'
+import axios from 'axios'
 
 export default {
-  components: {SiteHeader},
+  components: {SiteHeader, Sidebar},
   data () {
     return {
       tableData: [
         {c_id: 'ph', c_name: 'ph', c_teacher: 'ph', c_classroom: 'ph', c_dept: 'ph'}
-      ]
+      ],
+      user_id: 0
     }
   },
   methods: {
-    showC () {
-      showCourses().then(response => {
-        this.tableData = response.data.results
+    async demo () {
+      const that = this
+      // const token = localStorage.getItem('access.mysite')
+      axios.get('http://localhost:8000/api/users/', {
+        params: {
+          username: localStorage.getItem('username.mysite')
+        }
+      }).then((response) => {
+        that.user_id = response.data.results[0].id
+        console.log(that.user_id)
+      }).catch((error) => {
+        console.log(error.message)
       })
+    },
+    block () {
+      const that = this
+      const token = localStorage.getItem('access.mysite')
+      axios.patch('http://localhost:8000/api/users/' + '11' + '/', {
+        username: 'Fuck',
+        in_blacklist: true
+      }, {
+        headers: {Authorization: 'Bearer ' + token}
+      }).then((response) => {
+        that.$notify({
+          title: '作死按钮',
+          message: '哈哈哈 成功封号',
+          type: 'success'
+        })
+      }).catch((error) => {
+        that.$notify({
+          title: '出现错误',
+          message: error.message,
+          type: 'danger'
+        })
+      })
+    },
+    wrap () {
+      setTimeout(this.block(), 2000) // async handling info
     }
-  },
-  created: function () {
-    this.showC()
   }
 }
 </script>

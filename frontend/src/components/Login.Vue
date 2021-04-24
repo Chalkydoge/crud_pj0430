@@ -121,6 +121,7 @@ export default {
         password: this.ruleForm.pass
       }).then(function (response) {
         const storage = localStorage
+        console.log(response)
         // Date(...).getTime() 返回1970.01.01以来的毫秒数
         const expiredTime = (new Date()).getTime() + 300000
         console.log(expiredTime)

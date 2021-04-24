@@ -1,9 +1,10 @@
 from backend.models import Course, Comment, Teacher
 from backend.serializer import CourseSerializer, CommentSerializer, UserSerializer
-from backend.permissions import IsOwnerOrReadOnly
+from backend.permissions import IsOwnerOrReadOnly, HasPermToWrite, HasPermToEditAndDelete
 
 from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -65,10 +66,11 @@ class CommentList(generics.ListCreateAPIView):
 	"""
 	queryset = Comment.objects.all()
 	serializer_class = CommentSerializer
-	permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+	permission_classes = [permissions.IsAuthenticatedOrReadOnly & HasPermToWrite]
 	# TODO perform create from post(by frontend)
 	def perform_create(self, serializer):
-		serializer.save(p_owner=self.request.user)
+		obj = serializer.save(p_owner=self.request.user)
+		self.check_object_permissions(self.request, obj)
 	# TODO
 	def get_queryset(self):
 		q_fields = self.request.GET.keys()
@@ -89,12 +91,24 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
 	"""
 	queryset = Comment.objects.all()
 	serializer_class = CommentSerializer
-	permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+	permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, HasPermToEditAndDelete]
+
+	def perform_update(self, serializer):
+		q_rate = self.request.data['p_rate']
+		q_comment = self.request.data['p_comment']
+		obj = serializer.save(p_rate=q_rate, p_comment=q_comment)
+		self.check_object_permissions(self.request, obj)
 
 class UserList(generics.ListCreateAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer
+	def get_queryset(self):
+		ans_queryset = User.objects.all()
+		q_fields = self.request.GET.keys()
+		if 'username' in q_fields:
+			ans_queryset = ans_queryset.filter(username=self.request.GET['username'])
+		return ans_queryset
 
-class UserDetail(generics.RetrieveAPIView):
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = User.objects.all()
 	serializer_class = UserSerializer

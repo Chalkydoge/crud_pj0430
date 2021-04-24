@@ -108,6 +108,7 @@ export default {
       }).then(function (response) {
         that.signupResponse = response.data
         alert('注册成功!')
+        that.$router.push({name: 'Login'})
       }).catch(function (error) {
         alert(error.message)
       })

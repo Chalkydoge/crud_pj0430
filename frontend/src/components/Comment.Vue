@@ -106,7 +106,9 @@
             <el-pagination
             background
             layout="prev, pager, next"
-            :total="1000">
+            :total.sync="maxPage"
+            :current-page.sync="currentPage"
+            @current-change="handleCurrentChange">
             </el-pagination>
           </el-footer>
         </el-container>
@@ -135,7 +137,7 @@
       <el-dialog title="修改评论" :visible.sync="editFormVisible">
         <el-form :model="EditCommentForm">
           <el-form-item label="课程号" :label-width="formLabelWidth">
-            <el-input v-model="EditCommentForm.name" autocomplete="off"></el-input>
+            <el-input v-model="EditCommentForm.name" autocomplete="off" :disabled="true"></el-input>
           </el-form-item>
           <el-form-item label="评分" :label-width="formLabelWidth">
             <el-rate v-model="EditCommentForm.rate" show-text></el-rate>
@@ -176,15 +178,17 @@ export default {
   data () {
     return {
       count: 0,
-      comments: [], // storing comments,
+      comments: [], // 页面上评论区内部显示的评论数组,
       not_login: false,
       searchText: '',
-      CommentForm: {
+      currentPage: 0, // 当前的页码
+      maxPage: 10000000, // 最大能够翻到的页码
+      CommentForm: { // 新建评论的数据表格
         name: '',
         rate: 0,
         text: ''
       },
-      EditCommentForm: {
+      EditCommentForm: { // 编辑评论的数据表格
         p_id: 0,
         name: '',
         rate: 0,
@@ -194,15 +198,26 @@ export default {
       editFormVisible: false,
       formLabelWidth: '120px',
       drawer: false,
-      resultForms: []
+      resultForms: [] // 查询到的评论表格数据
     }
   },
   methods: {
+    handleCurrentChange () {
+      this.showComments()
+    },
     showComments () {
       // TODO fetch data from backend
       const that = this
-      axios.get('http://localhost:8000/api/comments/').then(function (response) {
+      const page = that.currentPage
+      let url = 'http://localhost:8000/api/comments'
+      if (page !== 1 && page !== 0) {
+        url = url + '/?page=' + page
+      } else {
+        url = url + '/'
+      }
+      axios.get(url).then(function (response) {
         that.comments = response.data.results
+        that.maxPage = (parseInt(response.data.count / 10) + 1) * 10
       }).catch(function (error) {
         alert(error.message)
       })
@@ -245,7 +260,7 @@ export default {
           p_cid: that.searchText
         }
       }).then(function (response) {
-        console.log(response.data.results)
+        console.log(response.data.count)
         that.resultForms = response.data.results
         that.$notify({
           title: '搜索信息',
@@ -274,11 +289,16 @@ export default {
       const curUser = localStorage.getItem('username.mysite')
       const that = this
       if (curUser !== row.p_owner) {
-        console.log('You cannot edit other\'s comments!')
+        that.$notify({
+          title: '错误',
+          message: '不能修改别人的评论哦',
+          type: 'error'
+        })
       } else {
         console.log('Be my guest')
         console.log('The comment to be updated is: ', row.p_id)
         that.EditCommentForm.p_id = row.p_id
+        that.EditCommentForm.name = row.p_cid
         that.editFormVisible = true
       }
     },
@@ -288,17 +308,16 @@ export default {
       const token = localStorage.getItem('access.mysite')
       if (curUser !== row.p_owner) {
         this.$notify({
-          title: '你TM想干什么',
-          message: '不准改别人的评论!',
-          type: 'warning'
+          title: '错误',
+          message: '不能删除别人的评论!',
+          type: 'error'
         })
       } else {
         axios.delete('http://localhost:8000/api/comments/' +
         row.p_id + '/', {
           params: {
             p_cid: row.p_cid,
-            p_rate: row.p_rate * 20,
-            // p_comment: row.p_comment,
+            p_rate: row.p_rate,
             p_owner: row.p_owner
           },
           headers: {Authorization: 'Bearer ' + token}
@@ -312,7 +331,7 @@ export default {
           that.$notify({
             title: '出现错误',
             message: error.message,
-            type: 'danger'
+            type: 'warning'
           })
         })
       }
@@ -338,7 +357,7 @@ export default {
         that.$notify({
           title: '出现错误',
           message: error.message,
-          type: 'danger'
+          type: 'error'
         })
       })
     },
@@ -352,7 +371,7 @@ export default {
   },
   created: function () {
     this.getUserInfo()
-    this.showComments()
+    setTimeout(this.showComments(), 1000)
   }
 }
 </script>

@@ -1,13 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
-import Fuck from '@/components/Fuck'
 import Index from '@/components/Index'
 import Search from '@/components/Search'
 import Register from '@/components/Register'
 import Login from '@/components/Login'
 import Logout from '@/components/Logout'
 import Comment from '@/components/Comment'
+import Admin from '@/components/Admin'
 
 Vue.use(Router)
 
@@ -28,11 +28,6 @@ export default new Router({
       meta: {
         title: '搜索'
       }
-    },
-    {
-      path: '/Fuck',
-      name: 'Fuck',
-      component: Fuck
     },
     {
       path: '/HelloWorld',
@@ -68,7 +63,15 @@ export default new Router({
       name: 'Comment',
       component: Comment,
       meta: {
-        title: 'qwq 萌萌的评论区~'
+        title: '评论'
+      }
+    },
+    {
+      path: '/Admin',
+      name: 'Admin',
+      component: Admin,
+      meta: {
+        title: '管理员'
       }
     }
   ]

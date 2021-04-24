@@ -1,7 +1,7 @@
 import re
 from rest_framework import serializers
 from .models import Course, Comment, Teacher, Department
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 
 # 写一个序列化器, 处理拿到的数据
 class CourseSerializer(serializers.ModelSerializer):
@@ -50,10 +50,15 @@ class CommentSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
 	# comments = serializers.PrimaryKeyRelatedField(many=True, queryset=Comment.objects.all())
 	def create(self, validated_data):
-		print(validated_data)
 		username = validated_data['username']
 		password = validated_data['password']
-		return User.objects.create_user(username=username, password=password)
+		u = User.objects.create_user(username=username, password=password)
+		initial_perm_list = ['Can add comment', 'Can view comment', 'Can change comment', 'Can delete comment']
+		for perm in initial_perm_list:
+			p = Permission.objects.get(name=perm)
+			u.user_permissions.add(p)
+		return u
+
 	class Meta:
 		model = User
-		fields = ['id', 'username', 'password']
+		fields = ['id', 'username', 'password', 'is_superuser']
