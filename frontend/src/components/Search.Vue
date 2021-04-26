@@ -2,36 +2,7 @@
   <div class="Search">
   <SiteHeader></SiteHeader>
   <el-container style="height: 150%; border: 1px solid #eee;">
-    <el-aside width="200px" style="background-color: rgb(238, 241, 246);">
-      <el-menu :default-openeds="[]">
-        <el-submenu index="1">
-          <template slot="title"><i class="el-icon-message"></i>主页</template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-link href="http://localhost:8080/#/" target="_blank" :underline="false">返回</el-link>
-            </el-menu-item>
-          </el-menu-item-group>
-        </el-submenu>
-        <el-submenu index="2">
-          <template slot="title"><i class="el-icon-menu"></i>功能</template>
-          <el-menu-item-group>
-            <el-menu-item index="2-1"><el-link href="http://localhost:8080/#/Comment" :underline="false">评课</el-link></el-menu-item>
-          </el-menu-item-group>
-        </el-submenu>
-        <el-submenu index="3">
-          <template slot="title"><i class="el-icon-setting"></i>登录</template>
-          <el-menu-item-group>
-            <template slot="title">没有账号?</template>
-            <el-menu-item index="3-1">注册</el-menu-item>
-          </el-menu-item-group>
-          <el-menu-item-group title="登录选项">
-            <el-menu-item index="3-2">管理员</el-menu-item>
-            <el-menu-item index="3-3">用户</el-menu-item>
-            <el-menu-item index="3-4">注销</el-menu-item>
-          </el-menu-item-group>
-        </el-submenu>
-      </el-menu>
-    </el-aside>
+    <Sidebar></Sidebar>
 
     <el-container>
       <el-header style="text-align: right; font-size: 12px">
@@ -66,17 +37,30 @@
 
           <el-row>
             <el-form-item label="上课地点" prop="c_classroom">
-              <el-select v-model="form.c_classroom" placeholder="请选择上课地点" >
+              <el-col :span="4">
+                <el-select v-model="form.c_classroom" placeholder="请选择上课地点" >
                 <el-option label="二教" value="H2"></el-option>
                 <el-option label="三教" value="H3"></el-option>
-              </el-select>
+                <el-option label="四教" value="H4"></el-option>
+                <el-option label="五教" value="H5"></el-option>
+                <el-option label="六教" value="H6"></el-option>
+                <el-option label="江湾1号楼" value="JA1"></el-option>
+                <el-option label="江湾2号楼" value="JB1"></el-option>
+                <el-option label="光华西" value="HGX"></el-option>
+                <el-option label="光华东" value="HGD"></el-option>
+                <el-option label="枫林" value="F"></el-option>
+                </el-select>
+              </el-col>
+              <el-col :span="4">
+                <el-input v-model="form.c_room_no" placeholder="请输入教室号"></el-input>
+              </el-col>
             </el-form-item>
           </el-row>
 
           <el-row>
             <el-col :span="8">
               <el-form-item label="授课教师" prop="c_teacher">
-                <el-input v-model="form.c_teacher"></el-input>
+                <el-input v-model="form.c_teacher_name"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -84,7 +68,7 @@
           <el-row>
             <el-col :span="8">
               <el-form-item label="开课院系" prop="c_dept">
-                <el-input v-model="form.c_dept"></el-input>
+                <el-input v-model="form.c_dept_name"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -105,9 +89,9 @@
         <el-table :data="info">
           <el-table-column prop="c_id" label="课程号" width="140"></el-table-column>
             <el-table-column prop="c_name" label="课程名称" width="200"></el-table-column>
-            <el-table-column prop="c_teacher" label="授课教师" width="140"></el-table-column>
+            <el-table-column prop="c_teacher_name" label="授课教师" width="140"></el-table-column>
             <el-table-column prop="c_classroom" label="上课地点" width="140"></el-table-column>
-            <el-table-column prop="c_dept" label="开课院系" width="140"></el-table-column>
+            <el-table-column prop="c_dept_name" label="开课院系" width="140"></el-table-column>
         </el-table>
       </el-drawer>
     </el-container>
@@ -119,7 +103,6 @@
     :visible.sync="dialogVisible"
     width=30%
     :before-close="createHandleClose">
-    <span>新建课程信息</span>
     <el-form :model="submitForm">
       <el-form-item label="课程号" :label-width="submitFormLabelWidth">
         <el-input v-model="submitForm.c_id" autocomplete="off"></el-input>
@@ -128,13 +111,16 @@
         <el-input v-model="submitForm.c_name" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="授课教师" :label-width="submitFormLabelWidth">
-        <el-input v-model="submitForm.c_teacher" autocomplete="off"></el-input>
+        <el-input v-model="submitForm.c_teacher_name" autocomplete="off"></el-input>
+      </el-form-item>
+      <el-form-item label="教师院系" :label-width="submitFormLabelWidth">
+        <el-input v-model="submitForm.c_tdept_name" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="上课地点" :label-width="submitFormLabelWidth">
         <el-input v-model="submitForm.c_classroom" autocomplete="off"></el-input>
       </el-form-item>
       <el-form-item label="开课院系" :label-width="submitFormLabelWidth">
-        <el-input v-model="submitForm.c_dept" autocomplete="off"></el-input>
+        <el-input v-model="submitForm.c_dept_name" autocomplete="off"></el-input>
       </el-form-item>
     </el-form>
 
@@ -148,26 +134,29 @@
 </template>
 
 <script>
+import Sidebar from '@/components/Sidebar'
 import SiteHeader from '@/components/SiteHeader'
 import axios from 'axios'
 
 export default {
-  components: {SiteHeader},
+  components: {SiteHeader, Sidebar},
   data () {
     return {
       form: {
         c_id: '',
         c_name: '',
         c_classroom: '',
-        c_teacher: '',
-        c_dept: ''
+        c_room_no: '',
+        c_teacher_name: '',
+        c_dept_name: ''
       },
       submitForm: {
         c_id: '',
         c_name: '',
         c_classroom: '',
-        c_teacher: '',
-        c_dept: ''
+        c_teacher_name: '',
+        c_tdept_name: '',
+        c_dept_name: ''
       },
       info: [],
       dialogVisible: false,
@@ -187,14 +176,23 @@ export default {
     },
     searchCourses () {
       const that = this
+      const classroom = that.form.c_classroom + that.form.c_room_no
       axios.get('http://localhost:8000/api/courses/', {
         params: {
+          c_id: that.form.c_id,
           c_name: that.form.c_name,
-          c_teacher: that.form.c_teacher
+          c_teacher_name: that.form.c_teacher_name,
+          c_classroom: classroom,
+          c_dept_name: that.form.c_dept_name
         }
       }).then(function (response) {
-        that.info = response.data
-        // console.log(that.info)
+        that.info = response.data.results
+        console.log(response)
+        that.$notify({
+          title: '成功√',
+          message: '找到了很多信息',
+          type: 'success'
+        })
       }).catch(function (error) {
         alert(error.message)
       })
@@ -202,14 +200,29 @@ export default {
     // TODO createCourses
     createCourses () {
       const that = this
+      const token = localStorage.getItem('access.mysite')
       axios.post('http://localhost:8000/api/courses/', {
         c_id: that.submitForm.c_id,
         c_name: that.submitForm.c_name,
-        c_teacher: that.submitForm.c_teacher,
+        c_teacher_name: that.submitForm.c_teacher_name,
+        c_tdept_name: that.submitForm.c_tdept_name,
         c_classroom: that.submitForm.c_classroom,
-        c_dept: that.submitForm.c_dept
+        c_dept_name: that.submitForm.c_dept_name
+      }, {
+        headers: {Authorization: 'Bearer ' + token}
       }).then(function (response) {
         // TODO get the response data
+        that.$notify({
+          title: '完成创建!',
+          message: '🆗',
+          type: 'success'
+        })
+      }).catch((error) => {
+        that.$notify({
+          title: '出错了!',
+          message: error.message,
+          type: 'error'
+        })
       })
     },
     onSubmit () {

@@ -1,6 +1,6 @@
 import re
 from rest_framework import serializers
-from .models import Course, Comment, Teacher, Department
+from .models import Course, Comment, Teacher, Department, MakeComment
 from django.contrib.auth.models import User, Permission
 
 # 写一个序列化器, 处理拿到的数据
@@ -9,15 +9,15 @@ class CourseSerializer(serializers.ModelSerializer):
 	课程信息的序列化器, 将API响应的数据序列化为json/dict格式
 	需要增加验证的功能(比如添加新的课程信息必须有效)
 	"""
-	c_teacher = serializers.PrimaryKeyRelatedField(queryset=Teacher.objects.all())
-	c_dept = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all())
+	c_teacher_name = serializers.ReadOnlyField(source="c_teacher.t_name")
+	c_dept_name = serializers.ReadOnlyField(source="c_dept.d_name")
 	
 	def validate_c_id(self, value):
 		"""
 		验证课程号是否合法 eg: XXX1100010.ss 就是不合法的编码
 		4位的院系编码 + 6位的课程代码(2位标识(11/12/13)+4位序号) + '.' + 课程号码(一门课程由多位老师开设)
 		"""
-		pattern = re.compile(r'([A-Z]{4})({11|12|13})([0-9]{4}).([0-9]{2})')
+		pattern = re.compile(r'[A-Z]{4}(11|12|13)[0-9]{3,4}\.[0-9]{2}$')
 		if re.match(pattern, value) is None:
 			raise serializers.ValidationError("课程号格式错误!")
 		return value
@@ -35,17 +35,17 @@ class CourseSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Course
-		fields = ['c_id', 'c_name', 'c_teacher', 'c_classroom', 'c_dept']
+		fields = ['c_id', 'c_name', 'c_teacher_name', 'c_classroom', 'c_dept_name']
 
 # Comments: 用户对于课程的评价信息
 class CommentSerializer(serializers.ModelSerializer):
 	"""
 	用户评论的序列化器
 	"""
-	p_owner = serializers.ReadOnlyField(source='p_owner.username')
+	p_coursename = serializers.ReadOnlyField(source="p_cid.c_name")
 	class Meta:
 		model = Comment
-		fields = ['p_id', 'p_cid', 'p_rate', 'p_comment', 'p_owner',]
+		fields = ['p_id', 'p_cid', 'p_rate', 'p_comment', 'p_coursename']
 
 class UserSerializer(serializers.ModelSerializer):
 	# comments = serializers.PrimaryKeyRelatedField(many=True, queryset=Comment.objects.all())
@@ -62,3 +62,9 @@ class UserSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = User
 		fields = ['id', 'username', 'password', 'is_superuser']
+
+class MakeCommentSerializer(serializers.ModelSerializer):
+	m_username = serializers.ReadOnlyField(source="m_owner.username")
+	class Meta:
+		model = MakeComment
+		fields = ['m_owner', 'm_commentid', 'm_username']

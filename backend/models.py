@@ -37,7 +37,10 @@ class Comment(models.Model):
 		MaxValueValidator(100)
 	])
 	p_comment = models.CharField(max_length=200)
-	p_owner = models.ForeignKey('auth.User', related_name='comments', on_delete=models.CASCADE)
+
+class MakeComment(models.Model):
+	m_owner = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+	m_commentid = models.OneToOneField(Comment, on_delete=models.CASCADE)
 
 # A Snippet for database creations
 # $ python manage.py shell

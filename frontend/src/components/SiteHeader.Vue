@@ -61,44 +61,20 @@
 </template>
 
 <script>
-import axios from 'axios'
-
+// import axios from 'axios'
+import authorization from '@/api/authorization'
 export default {
   name: 'SiteHeader',
   data () {
     return {
-      username: 'AAA',
-      hasLogin: false
+      hasLogin: false,
+      username: ''
     }
   },
   mounted () {
-    const that = this
-    const storage = localStorage
-
-    const expiredTime = Number(storage.getItem('expiredTime.mysite'))
-    const current = (new Date()).getTime()
-    const refreshToken = storage.getItem('refresh.mysite')
-    that.username = storage.getItem('username.mysite')
-
-    if (expiredTime > current) {
-      that.hasLogin = true
-    } else if (refreshToken !== null) {
-      axios.post('http://localhost:8000/api/token/refresh/', {
-        refresh: refreshToken
-      }).then(function (response) {
-        const nextExpiredTime = (new Date()).getTime() + 300000
-        storage.setItem('access.mysite', response.data.access)
-        storage.setItem('expiredTime.mysite', nextExpiredTime)
-        storage.removeItem('refresh.mysite')
-        that.hasLogin = true
-      }).catch(function () {
-        storage.clear()
-        that.hasLogin = false
-      })
-    } else {
-      storage.clear()
-      that.hasLogin = false
-    }
+    authorization().then((data) => {
+      [this.hasLogin, this.username] = data
+    })
   },
   methods: {
     logOut () {

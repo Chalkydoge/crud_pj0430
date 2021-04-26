@@ -6,7 +6,7 @@
           <template slot="title"><i class="el-icon-message"></i>主页</template>
           <el-menu-item-group>
             <el-menu-item index="1-1">
-              <el-link href="/#/Search" target="_blank">搜索</el-link>
+              <el-link href="/#/Search" :underline="false">搜索</el-link>
             </el-menu-item>
           </el-menu-item-group>
           </el-submenu>
@@ -20,12 +20,12 @@
           </el-submenu>
           <el-submenu index="3">
             <template slot="title"><i class="el-icon-setting"></i>
-              <el-link href="http://localhost:8080/#/Login" target="_blank">登录</el-link>
+              <el-link href="/#/Login" target="_blank">登录</el-link>
             </template>
           <el-menu-item-group>
             <template slot="title">没有账号?</template>
             <el-menu-item index="3-1">
-              <el-link href="http://localhost:8080/#/Register" target="_blank">注册</el-link>
+              <el-link href="/#/Register" target="_blank">注册</el-link>
             </el-menu-item>
           </el-menu-item-group>
           <el-menu-item-group title="登录选项">
