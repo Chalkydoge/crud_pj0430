@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
 import Index from '@/components/Index'
 import Search from '@/components/Search'
 import Register from '@/components/Register'
@@ -14,11 +13,11 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/',
+      path: '',
       name: 'Index',
       component: Index,
       meta: {
-        title: '首页'
+        title: '数据库pj - 首页'
       }
     },
     {
@@ -28,11 +27,6 @@ export default new Router({
       meta: {
         title: '搜索'
       }
-    },
-    {
-      path: '/HelloWorld',
-      name: 'HelloWorld',
-      component: HelloWorld
     },
     {
       path: '/Register',

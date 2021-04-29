@@ -1,6 +1,6 @@
 import re
 from rest_framework import serializers
-from .models import Course, Comment, Teacher, Department, MakeComment
+from .models import Course, Comment, Teacher, Department, MakeComment, BadComment
 from django.contrib.auth.models import User, Permission
 
 # 写一个序列化器, 处理拿到的数据
@@ -48,8 +48,8 @@ class CommentSerializer(serializers.ModelSerializer):
 		fields = ['p_id', 'p_cid', 'p_rate', 'p_comment', 'p_coursename']
 
 class UserSerializer(serializers.ModelSerializer):
-	# comments = serializers.PrimaryKeyRelatedField(many=True, queryset=Comment.objects.all())
 	def create(self, validated_data):
+		print("Call here")
 		username = validated_data['username']
 		password = validated_data['password']
 		u = User.objects.create_user(username=username, password=password)
@@ -61,10 +61,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = User
-		fields = ['id', 'username', 'password', 'is_superuser']
+		fields = ['id', 'username', 'password', 'is_superuser', 'email']
 
 class MakeCommentSerializer(serializers.ModelSerializer):
 	m_username = serializers.ReadOnlyField(source="m_owner.username")
 	class Meta:
 		model = MakeComment
 		fields = ['m_owner', 'm_commentid', 'm_username']
+
+class BadCommentSerializer(serializers.ModelSerializer):
+	b_username = serializers.ReadOnlyField(source='b_owner.username')
+	class Meta:
+		model = BadComment
+		fields = ['b_owner', 'b_count', 'b_username']

@@ -42,6 +42,11 @@ class MakeComment(models.Model):
 	m_owner = models.ForeignKey('auth.User', on_delete=models.CASCADE)
 	m_commentid = models.OneToOneField(Comment, on_delete=models.CASCADE)
 
+class BadComment(models.Model):
+	b_owner = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+	b_count = models.IntegerField()
+
+
 # A Snippet for database creations
 # $ python manage.py shell
 # from backend.models import Course, Teacher, Department

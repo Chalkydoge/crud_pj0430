@@ -6,10 +6,16 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import router from './router'
 import axios from 'axios'
+import SlideVerify from 'vue-monoplasty-slide-verify'
 
 Vue.config.productionTip = false
+
 Vue.use(ElementUI)
+
+Vue.use(SlideVerify)
+
 Vue.prototype.$axios = axios
+
 axios.defaults.headers.post['Content-Type'] = 'application/json'
 
 /* eslint-disable no-new */

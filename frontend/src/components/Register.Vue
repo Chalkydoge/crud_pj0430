@@ -14,14 +14,8 @@ export default {
   components: {SiteHeader, Pwd},
   data: function () {
     return {
-      true_god: '42姐',
       message: '登录',
       msg: 'xxx'
-    }
-  },
-  created: {
-    showTitle: function () {
-      this.SiteHeader.msg = 'xxx'
     }
   }
 }

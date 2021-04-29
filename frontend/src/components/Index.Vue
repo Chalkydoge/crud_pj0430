@@ -2,58 +2,19 @@
   <div class="Index">
   <SiteHeader></SiteHeader>
   <el-container style="border: 1px solid #eee;">
-<!--     <el-aside width="200px" style="background-color: rgb(238, 241, 246); min-height: 90vh;">
-      <el-menu :default-openeds="[]">
-        <el-submenu index="1">
-          <template slot="title"><i class="el-icon-message"></i>主页</template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-link href="http://localhost:8080/#/Search" target="_blank">搜索</el-link>
-            </el-menu-item>
-          </el-menu-item-group>
-        </el-submenu>
-        <el-submenu index="2">
-          <template slot="title"><i class="el-icon-menu"></i>功能</template>
-          <el-menu-item-group>
-            <el-menu-item index="2-1">
-              <el-link href="http://localhost:8080/#/Comment" :underline="false">评课</el-link>
-            </el-menu-item>
-          </el-menu-item-group>
-        </el-submenu>
-        <el-submenu index="3">
-          <template slot="title"><i class="el-icon-setting"></i>
-            <el-link href="http://localhost:8080/#/Login" target="_blank">登录</el-link>
-          </template>
-          <el-menu-item-group>
-            <template slot="title">没有账号?</template>
-            <el-menu-item index="3-1"><el-link href="http://localhost:8080/#/Register" target="_blank">注册</el-link></el-menu-item>
-          </el-menu-item-group>
-          <el-menu-item-group title="登录选项">
-            <el-menu-item index="3-2">管理员</el-menu-item>
-            <el-menu-item index="3-3">用户</el-menu-item>
-            <el-menu-item index="3-4">注销</el-menu-item>
-          </el-menu-item-group>
-        </el-submenu>
-      </el-menu>
-    </el-aside> -->
     <Sidebar></Sidebar>
     <el-container>
       <el-header style="text-align: right; font-size: 12px;">
-        <el-dropdown>
-          <i class="el-icon-setting" style="margin-right: 15px; margin-top:20px;"></i>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>查看</el-dropdown-item>
-            <el-dropdown-item>新增</el-dropdown-item>
-            <el-dropdown-item>删除</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
       </el-header>
 
       <el-main>
-        <el-button type="primary" @click="wrap();">神奇按钮</el-button>
+        <el-image :src="src">
+          <div slot="placeholder" class="image-slot">
+            加载中<span class="dot">...</span>
+          </div>
+        </el-image>
       </el-main>
     </el-container>
-
   </el-container>
   </div>
 </template>
@@ -70,7 +31,8 @@ export default {
       tableData: [
         {c_id: 'ph', c_name: 'ph', c_teacher: 'ph', c_classroom: 'ph', c_dept: 'ph'}
       ],
-      user_id: 0
+      user_id: 0,
+      src: 'https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg'
     }
   },
   methods: {

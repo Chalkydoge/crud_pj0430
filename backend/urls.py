@@ -21,6 +21,8 @@ urlpatterns = [
 	#
 	path('make_comment/', views.MakeCommentList.as_view(), name='make_comment-list'),
 	#
+	path('bad_comment/', views.BadCommentList.as_view(), name='bad_comment-list'),
+	# 
 	path('api-auth/', include('rest_framework.urls')),
 ]
 

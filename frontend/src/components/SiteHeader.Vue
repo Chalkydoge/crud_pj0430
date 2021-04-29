@@ -6,7 +6,7 @@
         Welcome, {{username}}
       </div>
       <div v-else>
-        RMA70-12!!!
+        <i class="el-icon-message"></i>TinyXK 简易课评系统
       </div>
     </el-col>
     <el-col :span="12" class="grid-content bg-success">
@@ -19,31 +19,46 @@
         active-text-color="#67C23A">
 
         <el-submenu index="1">
-          <template slot="title">我的工作台</template>
-          <el-menu-item index="1-1">新增</el-menu-item>
-
-          <el-submenu index="1-2">
-            <template slot="title">修改</template>
-            <el-menu-item index="1-2-1">修改信息</el-menu-item>
-            <el-menu-item index="1-2-1">删除信息</el-menu-item>
-          </el-submenu>
+            <template slot="title">评价</template>
+            <el-menu-item index="1-1">
+              <el-link type="text" href="/#/Comment">
+              写评论</el-link></el-menu-item>
+            <el-menu-item index="1-2">
+              <el-link type="text" href="/#/Comment">
+              进入讨论区</el-link></el-menu-item>
         </el-submenu>
 
         <el-submenu index="2">
-            <template slot="title">评价</template>
-            <el-menu-item index="2-1">写评论</el-menu-item>
-            <el-menu-item index="2-2">进入讨论区</el-menu-item>
+          <template slot="title">消息中心</template>
+            <el-menu-item index="2-1">
+              <div v-if="messageCount > 0">
+                <el-badge :value="messageCount">
+                  <el-popover
+                    placement="top-start"
+                    title="消息"
+                    width="200"
+                    trigger="hover">
+                    <div v-if="isAdmin">
+                      <div v-for="item in badComment" :key="item.username">
+                        {{ '用户' + item.b_username + '存在违禁行为!'}}
+                      </div>
+                    </div>
+                    <div v-else>
+                      <p>{{ msg }}</p>
+                    </div>
+                    <el-button slot="reference" type="text">消息</el-button>
+                  </el-popover>
+                </el-badge>
+              </div>
+              <div v-else>
+                <el-button type="text">消息</el-button>
+              </div>
+            </el-menu-item>
         </el-submenu>
 
         <el-submenu index="3">
-          <template slot="title">消息中心</template>
-          <el-menu-item index="3-1">消息</el-menu-item>
-          <el-menu-item index="3-2">评论</el-menu-item>
-        </el-submenu>
-
-        <el-submenu index="4">
-          <template slot="title">登陆选项</template>
-            <el-menu-item index="4-1">
+          <template slot="title">登录选项</template>
+            <el-menu-item index="3-1">
               <div v-if="hasLogin">
                 <el-button type="text" @click="logOut" style="margin: 0 auto;">注销</el-button>
               </div>
@@ -52,31 +67,86 @@
               </div>
             </el-menu-item>
         </el-submenu>
-
       </el-menu>
     </el-col>
   </el-row>
-
   </div>
 </template>
 
 <script>
-// import axios from 'axios'
+import axios from 'axios'
 import authorization from '@/api/authorization'
+
 export default {
   name: 'SiteHeader',
+  inject: ['reload'],
   data () {
     return {
+      formLabelWidth: '120px',
       hasLogin: false,
-      username: ''
+      username: '',
+      userid: 0,
+      messageCount: 0,
+      badComment: [],
+      msg: '暂时没有消息哦',
+      isAdmin: false
     }
   },
   mounted () {
+    const that = this
     authorization().then((data) => {
-      [this.hasLogin, this.username] = data
+      [that.hasLogin, that.username] = data
+    }).then(() => {
+      console.log(that.username)
+      if (that.username) {
+        axios.get('http://localhost:8000/api/users/', {
+          params: {
+            username: that.username
+          }
+        }).then((response) => {
+          let curUser = response.data.results[0] // only one assumed
+          that.userid = curUser.id
+          if (curUser.is_superuser) {
+            // 是管理员
+            const token = localStorage.getItem('access.mysite')
+            axios.get('http://localhost:8000/api/bad_comment/', {
+              params: {
+                b_username: that.username,
+                option: 'check'
+              },
+              headers: {Authorization: 'Bearer ' + token}
+            }).then((response) => {
+              that.badComment = response.data.results
+              that.isAdmin = true
+              that.messageCount = that.badComment.length
+            })
+          } else {
+            // 普通用户
+            const token = localStorage.getItem('access.mysite')
+            axios.get('http://localhost:8000/api/bad_comment/', {
+              params: {
+                b_username: that.username
+              },
+              headers: {Authorization: 'Bearer ' + token}
+            }).then((response) => {
+              that.badComment = response.data.results
+              that.isAdmin = false
+              if (that.badComment.length > 0 &&
+                that.badComment[0].b_count >= 5) {
+                that.messageCount = 1
+                that.msg = '请注意发表的言论信息🔥'
+              }
+            })
+          }
+        })
+      }
     })
   },
   methods: {
+    func () {
+      this.MessageFormVisible = true
+      this.messageCount += 1
+    },
     logOut () {
       const that = this
       that.hasLogin = false
@@ -114,5 +184,9 @@ export default {
     &:last-child {
       margin-bottom: 0;
     }
+  }
+  .item {
+    margin-top: 10px;
+    margin-right: 40px;
   }
 </style>

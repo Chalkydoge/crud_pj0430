@@ -9,7 +9,6 @@
           <el-tabs type="border-card" @tab-click="handleClick">
 
             <el-tab-pane label="课程信息">
-              <el-button type="primary" icon="el-icon-search">新建课程</el-button>
               <el-table :data="course_info">
                 <el-table-column prop="c_id" label="课程号" width="140"></el-table-column>
                   <el-table-column prop="c_name" label="课程名称" width="200"></el-table-column>
@@ -94,6 +93,17 @@
                   </template>
                 </el-table-column>
               </el-table>
+
+              <el-footer>
+                <el-pagination
+                background
+                layout="prev, pager, next"
+                :total.sync="maxUserPage"
+                :current-page.sync="currentUserPage"
+                @current-change="handleCurrentUserChange">
+                </el-pagination>
+              </el-footer>
+
             </el-tab-pane>
           </el-tabs>
         </el-main>
@@ -185,8 +195,8 @@
       </div>
 
       <div v-else>
-        Only Admin can view this site.<br>
-        只有管理员可以进入该界面。
+        <h1>Only Admin can view this site.</h1>
+        <h1>只有管理员可以进入该界面。</h1>
       </div>
 
     </el-container>
@@ -243,7 +253,9 @@ export default {
       currentCommentPage: 0, // 当前评论对应的页码
       maxCommentPage: 10000000,
       currentCoursePage: 0, // 当前课程信息对应页码
-      maxCoursePage: 100
+      maxCoursePage: 100,
+      currentUserPage: 0, // 当前的用户信息所在页
+      maxUserPage: 100 // 最多展示的用户信息页
     }
   },
   methods: {
@@ -302,7 +314,7 @@ export default {
       } else if (type === '用户管理') {
         axios.get('http://localhost:8000/api/users/').then((response) => {
           that.user_info = response.data.results
-          console.log(that.user_info[0].username)
+          that.maxUserPage = Math.ceil(response.data.count / 10) * 10
         }).catch((error) => {
           that.$notify({
             title: 'Error',
@@ -402,7 +414,27 @@ export default {
         })
       })
     },
+    // 用户信息展示分页
+    handleCurrentUserChange () {
+      const that = this
+      const page = that.currentUserPage
+      let url = 'http://localhost:8000/api/users'
+      if (page !== 1 && page !== 0) {
+        url = url + '/?page=' + page
+      } else {
+        url = url + '/'
+      }
 
+      axios.get(url).then((response) => {
+        that.user_info = response.data.results
+      }).catch((error) => {
+        that.$notify({
+          title: '出现错误',
+          message: error.message,
+          type: 'error'
+        })
+      })
+    },
     // 评论分页
     handleCurrentCommentChange () {
       const that = this
@@ -434,7 +466,7 @@ export default {
         url = url + '/'
       }
       axios.get(url).then(function (response) {
-        that.comments = response.data.results
+        that.course_info = response.data.results
       }).catch(function (error) {
         that.$notify({
           title: '出现错误',
@@ -467,9 +499,17 @@ export default {
       }, {
         headers: {Authorization: 'Bearer ' + token}
       }).then((response) => {
-        console.log(1)
+        that.$notify({
+          title: '修改成功',
+          message: '',
+          type: 'success'
+        })
       }).catch((error) => {
-        console.log(error.message)
+        that.$notify({
+          title: '出现错误',
+          message: error.message,
+          type: 'error'
+        })
       })
     },
     // 课程删除 OK
@@ -629,7 +669,7 @@ export default {
   mounted () {
     const that = this
     axios.get('http://localhost:8000/api/courses/').then((response) => {
-      that.course_info = response.data
+      that.course_info = response.data.results
       that.maxCoursePage = (Math.ceil(response.data.count / 10)) * 10
     }).catch((error) => {
       that.$notify({

@@ -3,71 +3,37 @@
     <SiteHeader></SiteHeader>
     <div v-if="this.not_login == false">
       <el-container style="border: 1px solid #eee">
-        <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-          <el-menu :default-openeds="[]">
-            <el-submenu index="1">
-              <template slot="title"><i class="el-icon-message"></i>主页</template>
-              <el-menu-item-group>
-                <el-menu-item index="1-1">
-                  <el-link href="/#/Search" target="_blank">搜索</el-link>
-                </el-menu-item>
-              </el-menu-item-group>
-            </el-submenu>
-            <el-submenu index="2">
-              <template slot="title"><i class="el-icon-menu"></i>功能</template>
-              <el-menu-item-group>
-                <el-menu-item index="2-1"><el-link href="/#/Comment" :underline="false">评课</el-link></el-menu-item>
-              </el-menu-item-group>
-            </el-submenu>
-            <el-submenu index="3">
-              <template slot="title"><i class="el-icon-setting"></i>
-                <el-link href="/#/Login" target="_blank">登录</el-link>
-              </template>
-              <el-menu-item-group>
-                <template slot="title">没有账号?</template>
-                <el-menu-item index="3-1"><el-link href="/#/Register" target="_blank">注册</el-link></el-menu-item>
-              </el-menu-item-group>
-              <el-menu-item-group title="登录选项">
-                <el-menu-item index="3-2">管理员</el-menu-item>
-                <el-menu-item index="3-3">用户</el-menu-item>
-                <el-menu-item index="3-4">注销</el-menu-item>
-              </el-menu-item-group>
-            </el-submenu>
-          </el-menu>
-        </el-aside>
-
+        <Sidebar></Sidebar>
         <el-container>
-          <el-header style="text-align: left; font-size: 25px;">
-            查看课评
-            <br>
-            想要写评论? <el-button type="info" icon="el-icon-edit" @click="dialogFormVisible=true">新建</el-button>
+          <el-header>
+            <i class="el-icon-chat-line-round"></i>评论区
           </el-header>
 
           <el-main style="text-align: left">
             <el-row>
-              <el-col :span=2>
-                没有找到评论?
-              </el-col>
               <el-col :span=8>
-                <el-input placeholder="找找看!" v-model="searchText" clearable prefix-icon="el-icon-search"></el-input>
+                <el-input placeholder="找找看! 输入课程序号进行查询~" v-model="searchText" clearable prefix-icon="el-icon-search"></el-input>
               </el-col>
               <el-col :span=2>
                 <el-button type="primary" icon="el-icon-search" @click="searchComments();">
                 搜索</el-button>
               </el-col>
+              <el-col :span=6>
+                <el-button type="info" icon="el-icon-edit"
+                @click="dialogFormVisible=true">新建</el-button>
+                <i class="el-icon-back"></i>
+                <span><el-tag>没有找到?来写评论吧</el-tag></span>
+              </el-col>
             </el-row>
 
             <el-row>
-              borderline
-            </el-row>
-
-            <el-row>
-              评论区
+              <el-divider></el-divider>
             </el-row>
 
             <el-table
             :data="comments"
             border
+            :default-sort = "{prop: 'p_rate', order: 'descending'}"
             style="width: 80%">
               <el-table-column
                 fixed
@@ -76,8 +42,14 @@
                 width="150">
               </el-table-column>
               <el-table-column
+                prop="p_coursename"
+                label="课程名称"
+                width="200">
+              </el-table-column>
+              <el-table-column
                 prop="p_rate"
                 label="评分"
+                sortable
                 width="120">
               </el-table-column>
               <el-table-column
@@ -120,7 +92,7 @@
           </el-form-item>
           <el-form-item label="评论内容" :label-width="formLabelWidth">
             <el-input type="textarea" :rows="2"
-            v-model="CommentForm.text"></el-input>
+            v-model="CommentForm.text" maxlength="200" show-word-limit></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -136,6 +108,9 @@
           </el-form-item>
           <el-form-item label="课程号" :label-width="formLabelWidth">
             <el-input v-model="CommentDetailForm.name" autocomplete="off" :disabled="true"></el-input>
+          </el-form-item>
+          <el-form-item label="课程名称" :label-width="formLabelWidth">
+            <el-input v-model="CommentDetailForm.coursename" autocomplete="off" :disabled="true"></el-input>
           </el-form-item>
           <el-form-item label="评分" :label-width="formLabelWidth">
             <el-rate v-model="CommentDetailForm.rate" show-text :disabled="true"></el-rate>
@@ -160,7 +135,7 @@
           </el-form-item>
           <el-form-item label="评论内容" :label-width="formLabelWidth">
             <el-input type="textarea" :rows="2"
-            v-model="EditCommentForm.text"></el-input>
+            v-model="EditCommentForm.text" maxlength="200" show-word-limit></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer">
@@ -169,13 +144,22 @@
         </div>
       </el-dialog>
 
-      <el-drawer title="查到的结果" :visible.sync="drawer" :with-header="true">
+      <el-drawer title="查到的结果" :visible.sync="drawer" :with-header="true" size="50%">
         <el-table :data="resultForms">
             <el-table-column fixed prop="p_cid" label="课程号" width="150">
             </el-table-column>
             <el-table-column prop="p_rate" label="评分" width="120">
             </el-table-column>
             <el-table-column prop="p_comment" label="评价内容" width="120">
+            </el-table-column>
+            <el-table-column
+              label="操作"
+              width="240">
+              <template slot-scope="scope">
+                <el-button @click="handleViewClick(scope.row)" type="primary" size="small">查看</el-button>
+                <el-button @click="handleEditClick(scope.row)" type="warning" size="small">编辑</el-button>
+                <el-button @click="handleDeleteClick(scope.row)" type="danger" size="small">删除</el-button>
+              </template>
             </el-table-column>
         </el-table>
         <el-footer>
@@ -191,6 +175,8 @@
 
     </div>
     <div v-else>
+      <el-page-header @back="goBack" content="404页面">
+      </el-page-header>
       <p>Not Logged in! 请登录以查看内容!!</p>
     </div>
   </div>
@@ -199,10 +185,11 @@
 <script>
 import SiteHeader from '@/components/SiteHeader'
 import axios from 'axios'
+import Sidebar from '@/components/Sidebar'
 
 export default {
   name: 'Comment',
-  components: {SiteHeader},
+  components: {SiteHeader, Sidebar},
   inject: ['reload'],
   data () {
     return {
@@ -230,6 +217,7 @@ export default {
       CommentDetailForm: {
         user: '',
         name: '',
+        coursename: '',
         rate: 0,
         text: ''
       },
@@ -244,6 +232,31 @@ export default {
     }
   },
   methods: {
+    goBack () {
+      this.$router.push({name: 'Index'})
+    },
+    decodeError (msg) {
+      let pat = /[0-9]{3}/
+      let code = pat.exec(msg)[0]
+      let res = ''
+      switch (code) {
+        case '401':
+          res = '注意, 您还未认证! 请留意登陆情况或是输入密码/账号是否有误!'
+          break
+        case '403':
+          res = '抱歉, 您没有权限操作!'
+          break
+        case '404':
+          res = '抱歉, 找不到资源!'
+          break
+        case '500':
+          res = '服务器发生错误!'
+          break
+        default:
+          res = '未知错误'
+      }
+      return res
+    },
     handleCurrentChange () {
       this.showComments()
     },
@@ -260,12 +273,12 @@ export default {
       }).catch(function (error) {
         that.$notify({
           title: '出现错误',
-          message: error.message,
+          message: that.decodeError(error.message),
           type: 'error'
         })
       })
     },
-    // TEST OK
+    // 显示课评 完成
     showComments () {
       // TODO fetch data from backend
       const that = this
@@ -278,16 +291,16 @@ export default {
       }
       axios.get(url).then(function (response) {
         that.comments = response.data.results
-        that.maxPage = (parseInt(response.data.count / 10) + 1) * 10
+        that.maxPage = (Math.ceil(response.data.count / 10)) * 10
       }).catch(function (error) {
         that.$notify({
           title: '出现错误',
-          message: error.message,
+          message: that.decodeError(error.message),
           type: 'error'
         })
       })
     },
-    // TEST OK
+    // 新建课评 完成
     addComments () {
       const that = this
       const token = localStorage.getItem('access.mysite')
@@ -306,26 +319,9 @@ export default {
           type: 'success'
         })
       }).catch(function (error) {
-        const msg = error.message
-        let pat = /[0-9]{3}/
-        let code = pat.exec(msg)[0]
-        let res = ''
-        switch (code) {
-          case '401':
-            res = '您还未认证!'
-            break
-          case '403':
-            res = '您没有权限操作'
-            break
-          case '404':
-            res = '找不到资源'
-            break
-          default:
-            res = '未知错误'
-        }
         that.$notify({
           title: '出现错误',
-          message: res,
+          message: that.decodeError(error.message),
           type: 'warning'
         })
       })
@@ -336,8 +332,8 @@ export default {
       const that = this
       that.drawer = true
       ans.then(() => {
-        console.log(that.baseSearchUrl) // 可能存在的下一个数据页面url
-        console.log(that.maxCommentPage) // 最大评论区页码数
+        // console.log(that.baseSearchUrl) // 可能存在的下一个数据页面url
+        // console.log(that.maxCommentPage) // 最大评论区页码数
         if (that.baseSearchUrl) {
           that.baseSearchUrl = that.baseSearchUrl.slice(0, -7)
         }
@@ -357,7 +353,7 @@ export default {
           console.log(error)
           that.$notify({
             title: '出现错误',
-            message: error.message,
+            message: that.decodeError(error.message),
             type: 'danger'
           })
         })
@@ -372,7 +368,6 @@ export default {
     handleViewClick (row) {
       const that = this
       that.getCommentUser(row.p_id).then((response) => {
-        console.log(response.data)
         if (!response.data.count) {
           that.CommentDetailForm.user = 'Unknown'
         } else {
@@ -381,10 +376,11 @@ export default {
         that.CommentDetailForm.name = row.p_cid
         that.CommentDetailForm.rate = row.p_rate / 20
         that.CommentDetailForm.text = row.p_comment
+        that.CommentDetailForm.coursename = row.p_coursename
       }).catch((error) => {
         that.$notify({
           title: '出现错误',
-          message: error.message,
+          message: that.decodeError(error.message),
           type: 'error'
         })
       })
@@ -415,7 +411,7 @@ export default {
       }).catch((error) => {
         that.$notify({
           title: '出现错误',
-          message: error.message,
+          message: that.decodeError(error.message),
           type: 'error'
         })
       })
@@ -438,7 +434,7 @@ export default {
             type: 'error'
           })
         } else {
-          that.$confirm('此操作将永久删除该课程的信息,是否继续?', '提示', {
+          that.$confirm('此操作将永久删除该课程评论的信息,是否继续?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning'
@@ -460,7 +456,7 @@ export default {
             }).catch((error) => {
               that.$notify({
                 title: '出现错误',
-                message: error.message,
+                message: that.decodeError(error.message),
                 type: 'warning'
               })
             })
@@ -488,7 +484,7 @@ export default {
       }).catch((error) => {
         that.$notify({
           title: '出现错误',
-          message: error.message,
+          message: that.decodeError(error.message),
           type: 'error'
         })
       })
@@ -555,6 +551,13 @@ export default {
 
 .box-card {
   width: 480px;
+}
+.el-header {
+  background-color: #B3C0D1;
+  color: #333;
+  line-height: 1.7;
+  font-size: 25px;
+  text-align: left;
 }
 
 </style>

@@ -1,55 +1,28 @@
 <template>
   <div class="PasswordForm">
-    <el-row>
-      <el-col :span="8" class="grid-content bg-normal">
-      </el-col>
-      <el-col :span="8" class="grid-content bg-success">
-      </el-col>
-      <el-col :span="8" class="el-menu-demo">
-        <el-menu
-          :default-active="activeIndex2"
-          mode="horizontal"
-          @select="handleSelect"
-          background-color="#F2F6FC"
-          text-color="#303133"
-          active-text-color="#ffd04b">
-          <el-submenu index="1">
-            <template slot="title">我的工作台</template>
-            <el-menu-item index="1-1">选项1</el-menu-item>
-            <el-menu-item index="1-2">选项2</el-menu-item>
-            <el-menu-item index="1-3">选项3</el-menu-item>
-            <el-submenu index="1-4">
-              <template slot="title">选项4</template>
-              <el-menu-item index="1-4-1">选项1</el-menu-item>
-              <el-menu-item index="1-4-2">选项2</el-menu-item>
-              <el-menu-item index="1-4-3">选项3</el-menu-item>
-            </el-submenu>
-          </el-submenu>
-          <el-menu-item index="2" disabled>消息中心</el-menu-item>
-          <el-menu-item index="3"><a href="https://www.ele.me" target="_blank">订单管理</a></el-menu-item>
-          <el-menu-item index="4">登录</el-menu-item>
-        </el-menu>
-      </el-col>
-    </el-row>
+    <el-page-header @back="goBack" content="登录页面">
+    </el-page-header>
 
-    <el-container style="height: 500px; border: 1px solid #eee;">
+    <el-container style="min-height: 90vh; border: 1px solid #eee; ">
       <el-main>
         <el-col :span="8" :offset="8" style="min-height: 36px; text-align: center;">
-          <h1>Login 登录</h1>
+          <h1><i class="el-icon-s-promotion"></i>Login - 登录</h1>
         </el-col>
-        <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm" style="width: 500px; margin: 0 auto;">
+        <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" style="width: 500px; margin: 0 auto;">
           <el-form-item label="用户名" prop="user">
             <el-input type="text" v-model="ruleForm.user" autocomplete="off"></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="pass">
-            <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
+            <el-input type="password" v-model="ruleForm.pass" autocomplete="off" show-password></el-input>
           </el-form-item>
-          <el-form-item label="确认密码" prop="checkPass">
-            <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
+          <el-form-item label="验证码" prop="checkCode">
+            <slide-verify :l="42" :r="10" :w="310" :h="155" slider-text="向右滑动"
+            @success="onSuccess" @fail="onFail" @refresh="onRefresh"></slide-verify>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="submitForm('ruleForm')" icon="el-icon-check">登录</el-button>
             <el-button @click="resetForm('ruleForm');show_info();" icon="el-icon-close">取消</el-button>
+            <el-link href="/#/Register" type="primary" icon="el-icon-question" :underline="false">没有账号?快去注册</el-link>
           </el-form-item>
         </el-form>
       </el-main>
@@ -74,17 +47,12 @@ export default {
       if (value === '') {
         callback(new Error('请输入密码'))
       } else {
-        if (this.ruleForm.checkPass !== '') {
-          this.$refs.ruleForm.validateField('checkPass')
-        }
         callback()
       }
     }
-    var validatePass2 = (rule, value, callback) => {
-      if (value === '') {
-        callback(new Error('请在此输入密码'))
-      } else if (value !== this.ruleForm.pass) {
-        callback(new Error('两次密码输入不一致'))
+    var validateCode = (rule, value, callback) => {
+      if (value !== true) {
+        callback(new Error('验证失败'))
       } else {
         callback()
       }
@@ -93,7 +61,7 @@ export default {
       ruleForm: {
         user: '',
         pass: '',
-        checkPass: ''
+        checkCode: false
       },
       rules: {
         user: [
@@ -102,17 +70,60 @@ export default {
         pass: [
           {validator: validatePass, trigger: 'blur'}
         ],
-        checkPass: [
-          {validator: validatePass2, trigger: 'blur'}
+        checkCode: [
+          {validator: validateCode, trigger: 'blur'}
         ]
       },
-      activeIndex2: '1',
-      activeIndex: '1'
+      CheckMsg: ''
     }
   },
   methods: {
-    handleSelect (key, keyPath) {
-      console.log(key, keyPath)
+    goBack () {
+      this.$router.push({name: 'Index'})
+    },
+    decodeError (msg) {
+      let pat = /[0-9]{3}/
+      let code = pat.exec(msg)[0]
+      let res = ''
+      switch (code) {
+        case '401':
+          res = '注意, 您还未认证! 请留意登陆情况或是输入密码/账号是否有误!'
+          break
+        case '403':
+          res = '抱歉, 您没有权限操作!'
+          break
+        case '404':
+          res = '抱歉, 找不到资源!'
+          break
+        case '500':
+          res = '服务器发生错误!'
+          break
+        default:
+          res = '未知错误'
+      }
+      return res
+    },
+    onSuccess () {
+      this.CheckMsg = '成功'
+      this.ruleForm.checkCode = true // 验证码通过
+      this.$message({
+        message: this.CheckMsg,
+        type: 'success'
+      })
+    },
+    onFail () {
+      this.CheckMsg = '失败'
+      this.$message({
+        message: this.CheckMsg,
+        type: 'error'
+      })
+    },
+    onRefresh () {
+      this.CheckMsg = '刷新中'
+      this.$message({
+        message: this.CheckMsg,
+        type: 'info'
+      })
     },
     signIn () {
       const that = this
@@ -130,16 +141,25 @@ export default {
         storage.setItem('refresh.mysite', response.data.refresh)
         storage.setItem('expiredTime.mysite', expiredTime)
         storage.setItem('username.mysite', that.ruleForm.user)
-        //
+        // notify message
+        that.$notify({
+          title: '登录成功',
+          message: '欢迎' + that.ruleForm.user,
+          type: 'success'
+        })
         that.$router.push({name: 'Index'})
       }).catch(function (error) {
-        alert(error.message)
+        that.$notify({
+          title: '登陆失败',
+          message: that.decodeError(error.message),
+          type: 'error'
+        })
+        that.resetForm('ruleForm')
       })
     },
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // do something here!!!
           this.signIn()
         } else {
           console.log('Error submit!!!')
@@ -153,7 +173,7 @@ export default {
     show_info () {
       this.$notify({
         title: '成功重置',
-        message: '这是一条成功的提示消息',
+        message: '',
         type: 'success'
       })
     }
