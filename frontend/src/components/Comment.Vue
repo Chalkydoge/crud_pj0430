@@ -85,7 +85,7 @@
       <el-dialog title="写评论" :visible.sync="dialogFormVisible">
         <el-form :model="CommentForm">
           <el-form-item label="课程号" :label-width="formLabelWidth">
-            <el-input v-model="CommentForm.name" autocomplete="off"></el-input>
+            <el-autocomplete v-model="CommentForm.name" :fetch-suggestions="querySearchAsync"></el-autocomplete>
           </el-form-item>
           <el-form-item label="评分" :label-width="formLabelWidth">
             <el-rate v-model="CommentForm.rate" show-text></el-rate>
@@ -199,9 +199,11 @@ export default {
       searchText: '',
       baseSearchUrl: '',
       currentPage: 0, // 当前的页码
-      maxPage: 10000000, // 最大能够翻到的页码
+      maxPage: 100, // 最大能够翻到的页码
       userEdit: '',
       userDelete: '',
+      timeout: null,
+      cid_list: [],
       CommentForm: { // 新建评论的数据表格
         name: '',
         rate: 0,
@@ -496,6 +498,27 @@ export default {
         message: '还没想好怎么写嘛wow 没事~',
         type: 'success'
       })
+    },
+    createStateFilter (queryString) {
+      return (state) => {
+        return (state.value.indexOf(queryString) === 0)
+      }
+    },
+    querySearchAsync (queryString, cb) {
+      let n = this.comments.length
+      let cid = new Array(n)
+      for (let i = 0; i < n; i++) {
+        if (this.comments[i]) {
+          cid[i] = {'value': this.comments[i].p_cid}
+        }
+      }
+      this.cid_list = cid
+      // console.log(this.cid_list)
+      let results = queryString ? this.cid_list.filter(this.createStateFilter(queryString)) : this.cid_list
+      clearTimeout(this.timeout)
+      this.timeout = setTimeout(() => {
+        cb(results)
+      }, 3000 * Math.random())
     },
     // OK
     async getCommentUser (commentId) {

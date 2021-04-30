@@ -23,7 +23,7 @@
 
           <el-submenu index="3">
             <template slot="title"><i class="el-icon-user"></i>
-              <el-link href="/#/Login" target="_blank">登录</el-link>
+              登录
             </template>
           <el-menu-item-group>
             <template slot="title">没有账号?</template>
