@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -26,7 +26,7 @@ SECRET_KEY = '1yap8e*-u#bv*$3krm8v)$ks1db&llz!mw548e_k+)qm!)u-0h'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -59,7 +59,7 @@ ROOT_URLCONF = 'db_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'dist')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,6 +72,10 @@ TEMPLATES = [
     },
 ]
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'dist/static'),
+]
+
 WSGI_APPLICATION = 'db_project.wsgi.application'
 
 
@@ -80,12 +84,12 @@ WSGI_APPLICATION = 'db_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # 注意这几个用大写的单词，必须写大写，这些坑我都走过，也浪费了不少时间，希望你不要再走
+        'ENGINE': 'django.db.backends.mysql',  # 使用MySQL
         'NAME': 'backend',
         'HOST': '127.0.0.1',
-        'PORT': 3376,
-        'USER': 'root',
-        'PASSWORD': '123456',  # 我的数据库是没有密码的，你的密码是什么就写什么，没有就留空
+        'PORT': 3376, # MySQL对应的端口
+        'USER': 'root', # 用户名
+        'PASSWORD': '123456',  # 这里填写相应的密码
     }
 }
 
@@ -127,6 +131,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
